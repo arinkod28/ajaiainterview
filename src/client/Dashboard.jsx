@@ -96,6 +96,10 @@ export default function Dashboard({ user, onLogout }) {
     loadDocs();
   }, [loadDocs]);
 
+  const handleRemoteUpdate = useCallback(() => {
+    if (activeDocId) loadDoc(activeDocId);
+  }, [loadDoc, activeDocId]);
+
   const handleShareUpdate = useCallback((shares) => {
     setActiveDoc(prev => prev ? { ...prev, shares } : prev);
   }, []);
@@ -152,7 +156,9 @@ export default function Dashboard({ user, onLogout }) {
                   <Icons.File />
                   <div className="doc-item-info">
                     <div className="doc-item-title">{doc.title || 'Untitled'}</div>
-                    <div className="doc-item-meta">{formatDate(doc.updated_at)}</div>
+                    <div className="doc-item-meta">
+                      {doc.last_edited_by_name ? `${doc.last_edited_by_name} · ` : ''}{formatDate(doc.updated_at)}
+                    </div>
                   </div>
                 </div>
               ))}
@@ -170,7 +176,11 @@ export default function Dashboard({ user, onLogout }) {
                   <Icons.File />
                   <div className="doc-item-info">
                     <div className="doc-item-title">{doc.title || 'Untitled'}</div>
-                    <div className="doc-item-meta">by {doc.owner_name}</div>
+                    <div className="doc-item-meta">
+                      {doc.last_edited_by_name
+                        ? `${doc.last_edited_by_name} · ${formatDate(doc.updated_at)}`
+                        : `by ${doc.owner_name}`}
+                    </div>
                   </div>
                   <span className="shared-badge">shared</span>
                 </div>
@@ -210,6 +220,11 @@ export default function Dashboard({ user, onLogout }) {
                 readOnly={activeDoc.access_type === 'view'}
               />
               <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+                {activeDoc.last_edited_by_name && (
+                  <span style={{ fontSize: '12px', color: 'var(--text-tertiary)', marginRight: '8px', whiteSpace: 'nowrap' }}>
+                    Edited by {activeDoc.last_edited_by_name} · {formatDate(activeDoc.updated_at)}
+                  </span>
+                )}
                 {activeDoc.is_owner && (
                   <>
                     <button 
@@ -236,10 +251,11 @@ export default function Dashboard({ user, onLogout }) {
                 )}
               </div>
             </div>
-            <Editor 
-              doc={activeDoc} 
+            <Editor
+              doc={activeDoc}
               docId={activeDocId}
               onUpdate={handleDocUpdate}
+              onRemoteUpdate={handleRemoteUpdate}
               readOnly={activeDoc.access_type === 'view'}
             />
           </>

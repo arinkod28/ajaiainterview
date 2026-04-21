@@ -146,7 +146,7 @@ function Toolbar({ editor }) {
   );
 }
 
-export default function Editor({ doc, docId, onUpdate, readOnly = false }) {
+export default function Editor({ doc, docId, onUpdate, onRemoteUpdate, readOnly = false }) {
   const [saveStatus, setSaveStatus] = useState('saved');
   const saveTimerRef = useRef(null);
   const lastSavedContent = useRef(doc.content);
@@ -219,6 +219,7 @@ export default function Editor({ doc, docId, onUpdate, readOnly = false }) {
         if (remote !== editor.getHTML()) {
           editor.commands.setContent(remote, false); // false = skip onUpdate
           lastSavedContent.current = remote;
+          onRemoteUpdate?.();
         }
       } catch {
         // Ignore transient poll failures

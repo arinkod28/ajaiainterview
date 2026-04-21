@@ -11,20 +11,22 @@ router.get('/', requireAuth, (req, res) => {
   
   // Owned documents
   const owned = query(
-    `SELECT d.*, u.username as owner_name, 'owner' as access_type 
-     FROM documents d 
-     JOIN users u ON d.owner_id = u.id 
-     WHERE d.owner_id = ? 
+    `SELECT d.*, u.username as owner_name, e.username as last_edited_by_name, 'owner' as access_type
+     FROM documents d
+     JOIN users u ON d.owner_id = u.id
+     LEFT JOIN users e ON d.last_edited_by = e.id
+     WHERE d.owner_id = ?
      ORDER BY d.updated_at DESC`,
     [userId]
   );
 
   // Shared with me
   const shared = query(
-    `SELECT d.*, u.username as owner_name, s.permission as access_type
+    `SELECT d.*, u.username as owner_name, e.username as last_edited_by_name, s.permission as access_type
      FROM documents d
      JOIN shares s ON d.id = s.document_id
      JOIN users u ON d.owner_id = u.id
+     LEFT JOIN users e ON d.last_edited_by = e.id
      WHERE s.shared_with_id = ?
      ORDER BY d.updated_at DESC`,
     [userId]
@@ -53,7 +55,11 @@ router.get('/:id', requireAuth, (req, res) => {
   const docId = req.params.id;
 
   const doc = get(
-    'SELECT d.*, u.username as owner_name FROM documents d JOIN users u ON d.owner_id = u.id WHERE d.id = ?',
+    `SELECT d.*, u.username as owner_name, e.username as last_edited_by_name
+     FROM documents d
+     JOIN users u ON d.owner_id = u.id
+     LEFT JOIN users e ON d.last_edited_by = e.id
+     WHERE d.id = ?`,
     [docId]
   );
 
@@ -125,12 +131,21 @@ router.put('/:id', requireAuth, (req, res) => {
   }
   
   if (updates.length > 0) {
+    updates.push('last_edited_by = ?');
+    params.push(userId);
     updates.push("updated_at = datetime('now')");
     params.push(docId);
     run(`UPDATE documents SET ${updates.join(', ')} WHERE id = ?`, params);
   }
 
-  const updated = get('SELECT d.*, u.username as owner_name FROM documents d JOIN users u ON d.owner_id = u.id WHERE d.id = ?', [docId]);
+  const updated = get(
+    `SELECT d.*, u.username as owner_name, e.username as last_edited_by_name
+     FROM documents d
+     JOIN users u ON d.owner_id = u.id
+     LEFT JOIN users e ON d.last_edited_by = e.id
+     WHERE d.id = ?`,
+    [docId]
+  );
   res.json(updated);
 });
 

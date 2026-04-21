@@ -72,6 +72,11 @@ async function initDB() {
     )
   `);
 
+  // Migrate: add last_edited_by for existing DBs (safe to run repeatedly)
+  try {
+    db.run('ALTER TABLE documents ADD COLUMN last_edited_by TEXT REFERENCES users(id)');
+  } catch { /* column already exists */ }
+
   // Seed demo users
   const bcrypt = require('bcryptjs');
   const { v4: uuidv4 } = require('uuid');

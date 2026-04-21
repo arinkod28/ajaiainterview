@@ -31,6 +31,9 @@ if (process.env.NODE_ENV === 'production') {
   app.set('trust proxy', 1);
 }
 
+// Healthcheck
+app.get('/api/health', (req, res) => res.json({ ok: true }));
+
 // API Routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/documents', require('./routes/documents'));

@@ -4,6 +4,8 @@
 
 - **Claude (Anthropic)** — Primary AI assistant for architecture planning, code generation, and documentation. Used via chat interface throughout the project.
 
+- **Codex (OpenAI)** — Secondary AI assistant for backend development.
+
 ## Where AI Materially Sped Up Work
 
 **Boilerplate and wiring:** The Express route handlers, SQLite schema, API client, and React component scaffolding were generated with AI assistance. This saved roughly 1–2 hours of typing repetitive CRUD patterns, letting me focus on product decisions and UX.

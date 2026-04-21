@@ -26,7 +26,7 @@ export default function LoginPage({ onLogin }) {
     <div className="login-page">
       <BackgroundShaders />
       <div className="login-card">
-        <h1>Doc<span>Edit</span></h1>
+        <h1>Work<span>Table</span></h1>
         <p className="login-subtitle">Collaborative document editing, simplified.</p>
         
         <form onSubmit={handleSubmit}>

@@ -262,7 +262,7 @@ export default function Dashboard({ user, onLogout }) {
         ) : (
           <div className="empty-state">
             <Icons.File />
-            <h2>Welcome to DocEdit</h2>
+            <h2>Welcome to WorkTable</h2>
             <p>Select a document from the sidebar or create a new one to get started.</p>
             <button className="btn btn-primary" onClick={handleCreateDoc}>
               <Icons.Plus /> Create Document

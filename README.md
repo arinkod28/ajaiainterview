@@ -1,13 +1,16 @@
-# DocEdit
+# WorkTable
 
 A lightweight collaborative document editor built as a full-stack web application. Create, edit, and share rich-text documents with other users.
 
-**Live Demo:** _[deployed URL here]_
+**Live Demo:** https://ajaiainterview-production.up.railway.app/
 
 ## Features
 
 - **Rich-text editing** — Bold, italic, underline, strikethrough, headings (H1–H3), bullet/numbered lists, blockquotes, horizontal rules. Powered by TipTap/ProseMirror.
 - **Auto-save** — Content saves automatically after 800ms of inactivity. Save status indicator shows current state.
+- **Real-time sync** — Editor polls for remote changes every 5 seconds. Updates apply silently when the local user is idle and not mid-save.
+- **Last edited by** — Sidebar and document header show which user last edited a document and when.
+- **Export to Markdown** — One-click export of the current document as a `.md` file, converted from the editor's HTML.
 - **File import** — Upload `.txt`, `.md`, or `.docx` files to create new editable documents. Markdown is converted to HTML; DOCX uses Mammoth for clean conversion.
 - **Sharing** — Share documents with other users by email. Grant edit or view-only access. Shared documents appear in a separate sidebar section.
 - **Persistence** — Documents, sharing permissions, and formatting are stored in SQLite and survive page refresh.
@@ -61,7 +64,7 @@ The production server runs on `PORT` (default 3001).
 ## Project Structure
 
 ```
-docedit/
+worktable/
 ├── src/
 │   ├── client/           # React frontend
 │   │   ├── App.jsx       # Root component, auth state

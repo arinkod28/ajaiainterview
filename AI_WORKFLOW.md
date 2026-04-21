@@ -10,6 +10,8 @@
 
 **Markdown-to-HTML converter:** The basic markdown parser in the file upload route was AI-generated. For the scope of this project, a lightweight regex-based approach was sufficient — a production app would use a proper library like `marked` or `remark`.
 
+**HTML-to-Markdown export:** The `htmlToMarkdown` function in `Editor.jsx` was AI-generated. It walks the TipTap DOM output and maps each node type to its Markdown equivalent. I verified the output against the editor's formatting options (headings, inline marks, lists, blockquotes, HR) rather than testing against arbitrary HTML.
+
 **CSS design system:** AI helped draft the initial CSS variables and component styles. I iterated on the color palette, typography pairing (DM Sans + DM Serif Display), and spacing to get the editorial feel I wanted.
 
 **Test scaffolding:** The integration test file structure and assertion patterns were AI-assisted, though I defined what scenarios to test based on the product requirements.
@@ -23,6 +25,8 @@
 - **Tailwind CSS:** AI defaulted to Tailwind. I opted for vanilla CSS with custom properties to keep the design intentional and avoid configuration overhead.
 
 - **Generated component structure:** AI initially created a more fragmented component tree. I consolidated to fewer, more cohesive components (Dashboard handles the sidebar + layout, Editor handles toolbar + content + auto-save) to reduce prop drilling and keep the codebase navigable.
+
+- **WebSocket for real-time sync:** AI's first suggestion for live collaboration was a full WebSocket + Yjs setup. I opted for a simpler polling approach (5-second interval with idle/save guards) to avoid adding socket infrastructure for this scope. The tradeoff is latency, but the implementation is self-contained in `Editor.jsx`.
 
 ## How I Verified Correctness
 

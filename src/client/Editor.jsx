@@ -150,6 +150,8 @@ export default function Editor({ doc, docId, onUpdate, readOnly = false }) {
   const [saveStatus, setSaveStatus] = useState('saved');
   const saveTimerRef = useRef(null);
   const lastSavedContent = useRef(doc.content);
+  const lastTypedAtRef = useRef(0);
+  const isSavingRef = useRef(false);
 
   const editor = useEditor({
     extensions: [
@@ -165,14 +167,16 @@ export default function Editor({ doc, docId, onUpdate, readOnly = false }) {
     editable: !readOnly,
     onUpdate: ({ editor }) => {
       if (readOnly) return;
+      lastTypedAtRef.current = Date.now();
       setSaveStatus('unsaved');
-      
+
       // Debounced auto-save
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
       saveTimerRef.current = setTimeout(async () => {
         const html = editor.getHTML();
         if (html === lastSavedContent.current) return;
-        
+
+        isSavingRef.current = true;
         setSaveStatus('saving');
         try {
           await api.updateDoc(docId, { content: html });
@@ -182,6 +186,8 @@ export default function Editor({ doc, docId, onUpdate, readOnly = false }) {
         } catch (err) {
           console.error('Save failed:', err);
           setSaveStatus('error');
+        } finally {
+          isSavingRef.current = false;
         }
       }, 800);
     },
@@ -198,6 +204,29 @@ export default function Editor({ doc, docId, onUpdate, readOnly = false }) {
       }
     }
   }, [docId]); // Only re-run when docId changes
+
+  // Poll for remote changes every 5 seconds
+  useEffect(() => {
+    if (!editor || readOnly) return;
+
+    const id = setInterval(async () => {
+      if (isSavingRef.current) return;
+      if (Date.now() - lastTypedAtRef.current < 3000) return;
+
+      try {
+        const data = await api.getDoc(docId);
+        const remote = data.content || '';
+        if (remote !== editor.getHTML()) {
+          editor.commands.setContent(remote, false); // false = skip onUpdate
+          lastSavedContent.current = remote;
+        }
+      } catch {
+        // Ignore transient poll failures
+      }
+    }, 5000);
+
+    return () => clearInterval(id);
+  }, [docId, editor]);
 
   // Update editable state
   useEffect(() => {

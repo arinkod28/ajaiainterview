@@ -54,3 +54,4 @@
 5. Mobile-responsive sidebar
 6. additional aesthetics to match users
 7. faster workflows transitions
+8. Clear Separation between two different types of ownership, currently it's not clear

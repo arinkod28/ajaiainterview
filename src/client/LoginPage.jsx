@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { api } from './api';
+import BackgroundShaders from './components/ui/background-shaders';
 
 export default function LoginPage({ onLogin }) {
   const [email, setEmail] = useState('alice@demo.com');
@@ -23,6 +24,7 @@ export default function LoginPage({ onLogin }) {
 
   return (
     <div className="login-page">
+      <BackgroundShaders />
       <div className="login-card">
         <h1>Doc<span>Edit</span></h1>
         <p className="login-subtitle">Collaborative document editing, simplified.</p>

@@ -5,6 +5,33 @@ import Underline from '@tiptap/extension-underline';
 import Placeholder from '@tiptap/extension-placeholder';
 import { api } from './api';
 
+function htmlToMarkdown(html) {
+  function convert(node) {
+    if (node.nodeType === 3) return node.textContent;
+    if (node.nodeType !== 1) return '';
+    const ch = Array.from(node.childNodes).map(convert).join('');
+    switch (node.tagName) {
+      case 'H1': return `# ${ch}\n\n`;
+      case 'H2': return `## ${ch}\n\n`;
+      case 'H3': return `### ${ch}\n\n`;
+      case 'P':  return `${ch}\n\n`;
+      case 'STRONG': case 'B':  return `**${ch}**`;
+      case 'EM':     case 'I':  return `*${ch}*`;
+      case 'U':                 return `_${ch}_`;
+      case 'S':                 return `~~${ch}~~`;
+      case 'UL': return Array.from(node.children).map(li => `- ${convert(li).trim()}`).join('\n') + '\n\n';
+      case 'OL': return Array.from(node.children).map((li, i) => `${i + 1}. ${convert(li).trim()}`).join('\n') + '\n\n';
+      case 'LI': return ch;
+      case 'BLOCKQUOTE': return ch.trim().split('\n').map(l => `> ${l}`).join('\n') + '\n\n';
+      case 'HR': return `---\n\n`;
+      case 'BR': return '\n';
+      default:   return ch;
+    }
+  }
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  return convert(doc.body).trim();
+}
+
 const ToolbarIcon = ({ path, size = 16 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     {typeof path === 'string' ? <path d={path} /> : path}
@@ -243,6 +270,18 @@ export default function Editor({ doc, docId, onUpdate, onRemoteUpdate, readOnly 
     };
   }, []);
 
+  const handleExportMd = useCallback(() => {
+    if (!editor) return;
+    const md = htmlToMarkdown(editor.getHTML());
+    const blob = new Blob([md], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${doc.title || 'document'}.md`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }, [editor, doc.title]);
+
   const statusLabels = {
     saved: '✓ Saved',
     saving: 'Saving...',
@@ -253,13 +292,23 @@ export default function Editor({ doc, docId, onUpdate, onRemoteUpdate, readOnly 
   return (
     <>
       {!readOnly && <Toolbar editor={editor} />}
-      <div className="editor-header-status" style={{ 
-        display: 'flex', justifyContent: 'flex-end', padding: '4px 24px',
-        borderBottom: '1px solid var(--border)', background: 'var(--bg-surface)'
+      <div className="editor-header-status" style={{
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        padding: '4px 24px', borderBottom: '1px solid var(--border)', background: 'var(--bg-surface)'
       }}>
-        <span className={`save-status ${saveStatus}`}>
-          {statusLabels[saveStatus]}
-        </span>
+        <button
+          className="btn btn-ghost btn-sm"
+          onClick={handleExportMd}
+          title="Export as Markdown"
+          style={{ fontSize: '12px' }}
+        >
+          ↓ Export .md
+        </button>
+        {!readOnly && (
+          <span className={`save-status ${saveStatus}`}>
+            {statusLabels[saveStatus]}
+          </span>
+        )}
       </div>
       <div className="editor-container">
         <div className="editor-paper">
